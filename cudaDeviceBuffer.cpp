@@ -4,10 +4,8 @@
 //
 //  Created by Sagar Dolas on 11/05/16.
 //  Copyright © 2016 Sagar Dolas. All rights reserved.
-//
 
 #include "cudaDeviceBuffer.hpp"
-
 template<typename type>
 cudaDeviceBuffer<type>::cudaDeviceBuffer(real_l _numParticles,const PhysicalQuantity _phyVar ) : phyVar(_phyVar) {
     
@@ -15,59 +13,61 @@ cudaDeviceBuffer<type>::cudaDeviceBuffer(real_l _numParticles,const PhysicalQuan
         actualSize = _numParticles ;
     }
     else
-        actualSize = _numParticles * 3 ;
+        actualSize = _numParticles * DIM;
     
     // Allocating the data
     data.resize(actualSize,0.0) ; // May be problem here
     
+    // Calculating the Number of Bytes
+    bytesToAllocate() ;
+    
 }
-
 template <typename type>
 cudaDeviceBuffer<type>::~cudaDeviceBuffer<type>(){
 
-    // We dont have to anything, freeing the , or may be calling free_memory_on_Device() ;
-}
+    freeMemoryOnDevice() ;
 
+}
 template<typename type>
 const type& cudaDeviceBuffer<type>::operator[](real_l index_) const{
     
-    return data[index_] ;
     
+    return data[index_] ;
+
 }
 
 template<typename type>
 type& cudaDeviceBuffer<type>::operator[](real_l index_){
     
+    
     return data[index_] ;
 
 }
 
 template<typename type>
-void cudaDeviceBuffer<type>::copyFromHost(type *fromHost_){
+void cudaDeviceBuffer<type>::copyToDevice(){
     
-    // copy to device , can be used cudaMemCpy() ;
+    checkError(cudaMemcpy(devicePtr, &data[0], numBytes_, cudaMemcpyHostToDevice)) ;
     
-
 }
-
 template<typename type >
-void cudaDeviceBuffer<type>::copyToHost(type *toHost_){
-    
-    // copy to host , cudaMemCpy()
+void cudaDeviceBuffer<type>::copyToHost(){
 
+    checkError(cudaMemcpy(&data[0], devicePtr, numBytes_, cudaMemcpyDeviceToHost)) ;
+   
 }
 
 template<typename type>
 void cudaDeviceBuffer<type>::allocateOnDevice(){
 
-    // cudaMalloc
+    checkError(cudaMalloc(&devicePtr, numBytes_));
     
 }
 
 template<typename type>
 void cudaDeviceBuffer<type>::freeMemoryOnDevice(){
     
-    //cudafree
+    checkError(cudaFree(devicePtr)) ;
 
 }
 
@@ -75,14 +75,22 @@ template<typename type>
 real_l const cudaDeviceBuffer<type>::bytesToAllocate(){
     
     //calculate number of bytes
-    
+    numBytes_ = actualSize * sizeof(type) ;
 }
 
 template<typename type>
 void cudaDeviceBuffer<type>::reset(){
     
-    //
+    // Not defined yet 
 
 }
 
+template<typename type>
+void cudaDeviceBuffer<type>::checkError(const cudaError_t err){
+    
+    if(err!= cudaSuccess){
+        std::cout<<cudaGetErrorString(err)<<std::endl ;
+        exit(-1) ;
+    }
+}
 
