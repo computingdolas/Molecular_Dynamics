@@ -8,11 +8,14 @@
 
 #include <iostream>
 #include <list>
-#include "cudaDeviceBuffer.hpp"
+//#include "cudaDeviceBuffer.hpp"
+#include "PhysicalVariable.h"
+#include <cuda_runtime.h>
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    
-    real_l N = 3;
+   
+     // insert code here...
+    PhysicalQuantity scl = Scalar ;    
+   // cudaDeviceBuffer<double>  vec1(1000,scl );    
     
     return 0;
 }

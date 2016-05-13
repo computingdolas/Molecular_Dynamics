@@ -49,7 +49,7 @@ public:
     void freeMemoryOnDevice() ;
     
     //Calculate Memory...//
-    real_l const bytesToAllocate() ;
+    void bytesToAllocate() ;
     
     //Reseting the data array....//
     void reset() ;

@@ -72,7 +72,7 @@ void cudaDeviceBuffer<type>::freeMemoryOnDevice(){
 }
 
 template<typename type>
-real_l const cudaDeviceBuffer<type>::bytesToAllocate(){
+void cudaDeviceBuffer<type>::bytesToAllocate(){
     
     //calculate number of bytes
     numBytes_ = actualSize * sizeof(type) ;
