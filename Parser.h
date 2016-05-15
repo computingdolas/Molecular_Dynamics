@@ -12,14 +12,11 @@ public:
     int num_params;
     int num_particles;
     std::string filename;
-    std::vector<real_d> mass;
-    std::vector<real_d> pos_x;
-    std::vector<real_d> pos_y;
-    std::vector<real_d> pos_z;
-    std::vector<real_d> vel_x;
-    std::vector<real_d> vel_y;
-    std::vector<real_d> vel_z;
     std::map<std::string,std::string> params;
+
+    std::vector<real_d> mass;
+    std::vector<real_d> pos;
+    std::vector<real_d> vel;
 
 
     //Parse the parameters
