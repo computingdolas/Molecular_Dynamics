@@ -39,12 +39,12 @@ void Parser::readInputConfiguration(){
     for(int i=0;i<this->num_particles;i++){
         input_file>>mass>>pos_x>>pos_y>>pos_z>>vel_x>>vel_y>>vel_z;
         (this->mass).push_back(mass);
-        (this->pos_x).push_back(pos_x);
-        (this->pos_y).push_back(pos_y);
-        (this->pos_z).push_back(pos_z);
-        (this->vel_x).push_back(vel_x);
-        (this->vel_y).push_back(vel_y);
-        (this->vel_z).push_back(vel_z);
+        (this->pos).push_back(pos_x);
+        (this->pos).push_back(pos_y);
+        (this->pos).push_back(pos_z);
+        (this->vel).push_back(vel_x);
+        (this->vel).push_back(vel_y);
+        (this->vel).push_back(vel_z);
     }
 
     input_file.close();
