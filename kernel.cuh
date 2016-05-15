@@ -25,7 +25,10 @@ __global__ void  calcForces(real_d *force,real_d *position,const real_l numParti
         // Find out the index of particle
         vidx = i * 3 ;
 
-        relativeVector[3] = {0.0,0.0,0.0} ;
+        // Initialise relative vector again to zero
+        for(real_l i =0; i < 3 ; ++i){
+            relativeVector[i] = 0.0 ;
+        }
         // Find out the realtive vector
         relativeVector[0] = position[idx] - position[vidx] ;
         relativeVector[1] = position[idx+1] - position[vidx+1] ;
@@ -64,7 +67,9 @@ __global__ void updateVelocity(const real_d*forceNew,const real_d*forceOld,real_
 // Calculation of Leonard Jones Potential
 __device__ void lenardJonesPotential(const real_d *relativeVector,real_d * forceVector ,const real_d sigma , const real_d epislon) {
 
-    forceVector[3] = {0.0} ;
+    for(real_l i =0; i < 3 ; ++i){
+        forceVector[i] = 0.0 ;
+    }
 
     real_d distmod = sqrt( (relativeVector[0]* relativeVector[0]) + (relativeVector[1] * relativeVector[1]) + relativeVector[2] * relativeVector[2] ) ;
     real_d dist = distmod * distmod ;
