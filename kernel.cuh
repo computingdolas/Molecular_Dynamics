@@ -12,7 +12,7 @@ __device__ void lenardJonesPotential(const real_d *relativeVector,real_d * force
 __global__ void  calcForces(real_d *force,real_d *position,const real_l numParticles ,const real_d sigma, const real_d epislon){
 
     real_l idx = threadIdx.x + blockIdx.x * blockDim.x ;
-    real_l vidx = 0 ;\
+    real_l vidx = idx * 3 ; 
 
     // Relative Vector
     real_d relativeVector[3] = {0.0,0.0,0.0} ;
@@ -36,9 +36,9 @@ __global__ void  calcForces(real_d *force,real_d *position,const real_l numParti
 
         // Find put the force between these tow particle
         lenardJonesPotential(relativeVector,forceVector ,sigma,epislon) ;
-        force[idx] += forceVector[0] ;
-        force[idx+1] += forceVector[1] ;
-        force[idx+2] += forceVector[2] ;
+        force[vidx] += forceVector[0] ;
+        force[vidx+1] += forceVector[1] ;
+        force[vidx+2] += forceVector[2] ;
     }
 
 }
