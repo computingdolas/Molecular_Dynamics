@@ -10,10 +10,10 @@ void VTKWriter::writeVTKOutput(const cudaDeviceBuffer<real_d> &mass, const cudaD
     std::ofstream outfile;
     std::ostringstream file_number_str;
     file_number_str<<this->file_number;
-    std::string file_name = this->file_base+file_number_str.str();
+    std::string file_name = this->file_base+file_number_str.str()+".vtk";
     this->file_number++;
 
-    outfile.open(file_name);
+    outfile.open("vtk/"+file_name);
     if(!outfile.is_open()){
         std::cerr<<"Could not write vtk output to file "<<file_name<<std::endl;
         exit(-1);

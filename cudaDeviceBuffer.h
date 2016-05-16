@@ -77,7 +77,7 @@ cudaDeviceBuffer<type>::cudaDeviceBuffer(real_l _numParticles,const PhysicalQuan
 template <typename type>
 cudaDeviceBuffer<type>::~cudaDeviceBuffer<type>(){
 
-    //freeMemoryOnDevice() ; // Do not call this function untill and unless you are sure that you have allocated memory in the device
+    freeMemoryOnDevice() ; // Do not call this function untill and unless you are sure that you have allocated memory in the device
 
 }
 template<typename type>
