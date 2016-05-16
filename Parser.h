@@ -6,7 +6,10 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+
 #include "Type.h"
+#include "cudaDeviceBuffer.h"
+
 class Parser{
 public:
     int num_params;
@@ -18,6 +21,11 @@ public:
     std::vector<real_d> pos;
     std::vector<real_d> vel;
 
+    //Constructor
+    Parser(int num_params, std::string filename){
+        this->num_params = num_params;
+        this->filename = filename;
+    }
 
     //Parse the parameters
     void readParameters();
@@ -25,10 +33,8 @@ public:
     //Read input configuration
     void readInputConfiguration();
 
-    //Constructor
-    Parser(int num_params, std::string filename){
-        this->num_params = num_params;
-        this->filename = filename;
-    }
+    // Fill the cudaDeviceBuffers
+    void fillBuffers(cudaDeviceBuffer<real_d> &mass, cudaDeviceBuffer<real_d> &velocity, cudaDeviceBuffer<real_d> &position ) ;
+
 };
 #endif // PARSER_H

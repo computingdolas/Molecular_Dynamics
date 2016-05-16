@@ -37,7 +37,6 @@ void Parser::readInputConfiguration(){
         input_file>>this->num_particles;
     }
     for(int i=0;i<this->num_particles;i++){
-        input_file>>mass>>pos_x>>pos_y>>pos_z>>vel_x>>vel_y>>vel_z;
         (this->mass).push_back(mass);
         (this->pos).push_back(pos_x);
         (this->pos).push_back(pos_y);
@@ -48,4 +47,38 @@ void Parser::readInputConfiguration(){
     }
 
     input_file.close();
+}
+
+void Parser::fillBuffers(cudaDeviceBuffer<real_d> &mass,
+                         cudaDeviceBuffer<real_d> &velocity,
+                         cudaDeviceBuffer<real_d> &position) {
+
+    // Local variables
+    real_d mass_,pos_x,pos_y,pos_z,vel_x,vel_y,vel_z;
+
+    // File to be opened
+    std::string config_filename = this->params["part_input_file"];
+
+    std::ifstream input_file;
+    input_file.open(config_filename);
+
+    if(!input_file.is_open()){
+        std::cerr<<"Could not open file "<<config_filename;
+    }
+    else{
+        input_file>>this->num_particles;
+    }
+
+    for (real_l i =0 ; i < this->num_particles ; ++i ){
+
+        real_l vidx  = i * 3 ;
+        input_file>>mass_>>pos_x>>pos_y>>pos_z>>vel_x>>vel_y>>vel_z;
+        mass[i] = mass_ ;
+        position[vidx]    = pos_x ;
+        position[vidx +1] = pos_y ;
+        position[vidx +2] = pos_z ;
+        velocity[vidx]    = vel_x ;
+        velocity[vidx +1] = vel_y ;
+        velocity[vidx +2] = vel_z ;
+    }
 }
