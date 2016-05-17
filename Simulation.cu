@@ -8,27 +8,28 @@
 #include "kernel.cuh"
 #include <string>
 #include "VTKWriter.h"
+#include <iomanip>
 
-#define num_part 2
 
 int main(int argc, const char * argv[]) {
+    // Reading from file
+    Parser p(10,argv[1]);
+    p.readParameters();
+    p.readInputConfiguration();
+
+    // number of Particles
+    const real_l numparticles = p.num_particles ;
 
     // Creating the device Buffers
-    cudaDeviceBuffer<real_d> mass(num_part,PhysicalQuantity::Scalar) ;
-    cudaDeviceBuffer<real_d> position(num_part,PhysicalQuantity::Vector) ;
-    cudaDeviceBuffer<real_d> velocity(num_part,PhysicalQuantity::Vector) ;
-    cudaDeviceBuffer<real_d> forceold(num_part,PhysicalQuantity::Vector) ;
-    cudaDeviceBuffer<real_d> forcenew(num_part,PhysicalQuantity::Vector) ;
+    cudaDeviceBuffer<real_d> mass(numparticles,PhysicalQuantity::Scalar) ;
+    cudaDeviceBuffer<real_d> position(numparticles,PhysicalQuantity::Vector) ;
+    cudaDeviceBuffer<real_d> velocity(numparticles,PhysicalQuantity::Vector) ;
+    cudaDeviceBuffer<real_d> forceold(numparticles,PhysicalQuantity::Vector) ;
+    cudaDeviceBuffer<real_d> forcenew(numparticles,PhysicalQuantity::Vector) ;
 
-    // Reading from file
-    Parser p(10,"stable.par") ;
-    p.readParameters();
     p.fillBuffers(mass,velocity,position);
 
-    std::cout<<forcenew[0]<<" "<<forcenew[1]<<" "<<forcenew[2]<<" "<<forcenew[3]<<" "<<forcenew[4]<<" "<<forcenew[5]<<std::endl;
-
-    std::cout<<position[0]<<" "<<position[1]<<" "<<position[2]<<" "<<velocity[0]<<" "<<velocity[1]<<" "<<velocity[2]<<std::endl ;
-    std::cout<<position[3]<<" "<<position[4]<<" "<<position[5]<<" "<<velocity[3]<<" "<<velocity[4]<<" "<<velocity[5]<<std::endl ;
+    std::cout<<mass[1]<<std::endl ;
 
     // Allocating memory on Device
     mass.allocateOnDevice();
@@ -49,55 +50,55 @@ int main(int argc, const char * argv[]) {
     real_d timestep_length = std::stod(p.params["timestep_length"]) ;
     real_d epsilon = std::stod(p.params["epsilon"]) ;
     real_d sigma = std::stod(p.params["sigma"]) ;
+    real_l vtk_out_freq = std::stol(p.params["vtk_out_freq"]) ;
+    real_l threads_per_blocks = std::stol(p.params["cl_workgroup_1dsize"]) ;
+    std::string vtk_name = p.params["vtk_out_name_base"] ;
 
+    VTKWriter writer(vtk_name) ;
 
-    std::cout<<timestep_length<<std::endl ;
-    std::cout<<sigma<<std::endl ;
+    //Calculate the number of blocks
+    real_l num_blocks ;
 
-    VTKWriter writer("blocks_");
+    if(numparticles % threads_per_blocks ==0) num_blocks = numparticles / threads_per_blocks ;
+    else num_blocks = (numparticles / threads_per_blocks) + 1 ;
+
+    //std::cout<<num_blocks<<" "<<threads_per_blocks<<std::endl;
+
 
     // Algorithm to follow
     {
+
+        real_l iter = 0 ;
         // calculate Initial forces
-        calcForces<<<2,1>>>(forcenew.devicePtr,position.devicePtr,num_part,sigma,epsilon) ;
-        for(real_l i = 0 ; i < 10; ++i) {
+        calcForces<<<2,1>>>(forcenew.devicePtr,position.devicePtr,numparticles,sigma,epsilon) ;
+        for(real_d t =0.0 ; t < time_end ; t+= timestep_length ) {
 
             // Update the Position
-            updatePosition<<<1,2>>>(forcenew.devicePtr,position.devicePtr,velocity.devicePtr,mass.devicePtr,timestep_length);
+            updatePosition<<<num_blocks,threads_per_blocks>>>(forcenew.devicePtr,position.devicePtr,velocity.devicePtr,mass.devicePtr,numparticles,timestep_length);
 
             // Copy the forces
-            copyForces<<<1,2>>>(forceold.devicePtr,forcenew.devicePtr);
+            copyForces<<<num_blocks,threads_per_blocks>>>(forceold.devicePtr,forcenew.devicePtr, numparticles);
 
             // Calculate New forces
-            calcForces<<<1,2>>>(forcenew.devicePtr,position.devicePtr,num_part,sigma,epsilon);
+            calcForces<<<num_blocks,threads_per_blocks>>>(forcenew.devicePtr,position.devicePtr,numparticles, sigma,epsilon);
 
             // Update the velocity
-            updateVelocity<<<1,2>>>(forcenew.devicePtr,forceold.devicePtr,velocity.devicePtr,mass.devicePtr,timestep_length);
+            updateVelocity<<<num_blocks,threads_per_blocks>>>(forcenew.devicePtr,forceold.devicePtr,velocity.devicePtr,mass.devicePtr,numparticles,timestep_length);
 
-            // copy to host back
-            forcenew.copyToHost();
-            position.copyToHost();
-            velocity.copyToHost();
+            if(iter % vtk_out_freq == 0){
+                // copy to host back
+                forcenew.copyToHost();
+                forceold.copyToHost();
+                position.copyToHost();
+                velocity.copyToHost();
+                writer.writeVTKOutput(mass,position,velocity,numparticles);
+            }
 
-            writer.writeVTKOutput(mass,position,velocity,num_part);
-
+            // Iterator count
+            ++iter ;
         }
 
     }
-
-
-    // copy to host back
-    forcenew.copyToHost();
-    position.copyToHost();
-    velocity.copyToHost();
-    // release memory from device
-
-
-    //Visualizing the data
-    std::cout<<forcenew[0]<<" "<<forcenew[1]<<" "<<forcenew[2]<<" "<<forcenew[3]<<" "<<forcenew[4]<<" "<<forcenew[5]<<std::endl;
-    std::cout<<position[0]<<" "<<position[1]<<" "<<position[2]<<" "<<velocity[0]<<" "<<velocity[1]<<" "<<velocity[2]<<std::endl ;
-    std::cout<<position[3]<<" "<<position[4]<<" "<<position[5]<<" "<<velocity[3]<<" "<<velocity[4]<<" "<<velocity[5]<<std::endl ;
-
 
     return 0;
 }                           

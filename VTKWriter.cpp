@@ -1,4 +1,5 @@
 #include "VTKWriter.h"
+#include <iomanip>
 //Constructor
 VTKWriter::VTKWriter(std::string file_base){
     this->file_base = file_base;
@@ -27,7 +28,7 @@ void VTKWriter::writeVTKOutput(const cudaDeviceBuffer<real_d> &mass, const cudaD
     outfile<<"DATASET UNSTRUCTURED_GRID"<<std::endl;
     outfile<<"POINTS "<<num_particles<<" double"<<std::endl;
     for(int i=0;i<num_particles;i++){
-        outfile<<position[i*3]<<" "<<position[i*3+1]<<" "<<position[i*3+2]<<std::endl;
+        outfile<<std::setprecision(8)<<position[i*3]<<" "<<position[i*3+1]<<" "<<position[i*3+2]<<std::endl;
     }
 
     //Output mass
@@ -37,12 +38,12 @@ void VTKWriter::writeVTKOutput(const cudaDeviceBuffer<real_d> &mass, const cudaD
     outfile<<"SCALARS m double"<<std::endl;
     outfile<<"LOOKUP_TABLE default"<<std::endl;
     for(int i=0;i<num_particles;i++){
-        outfile<<mass[i]<<std::endl;
+        outfile<<std::setprecision(8)<<mass[i]<<std::endl;
     }
 
     //Output velocity
     outfile<<"VECTORS v double"<<std::endl;
     for(int i=0;i<num_particles;i++){
-        outfile<<velocity[i*3]<<" "<<velocity[i*3+1]<<" "<<velocity[i*3+2]<<std::endl;
+        outfile<<std::setprecision(8)<<velocity[i*3]<<" "<<velocity[i*3+1]<<" "<<velocity[i*3+2]<<std::endl;
     }
 }
