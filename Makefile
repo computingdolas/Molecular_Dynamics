@@ -8,14 +8,17 @@ CC = nvcc
 
 all	:particle
 
-particle	:Parser.o VTKWriter.o 
-		$(CC) $(CFLAGScuda) Parser.o VTKWriter.o Simulation.cu -o SimPart
+particle	:Parser.o VTKWriter.o Time.o 
+		$(CC) $(CFLAGScuda) Parser.o VTKWriter.o Time.o Simulation.cu -o hesp
 
 Parser.o	:Parser.cpp
 		$(CCg) $(CFLAGS) Parser.cpp
 
 VTKWriter.o	:VTKWriter.cpp
 		$(CCg) $(CFLAGS) VTKWriter.cpp
+
+Time.o		:Time.cpp
+		$(CCg) $(CFLAGS) Time.cpp
 
 clean		:
 		rm -rf *.o *.out  

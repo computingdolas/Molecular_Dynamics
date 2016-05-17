@@ -14,7 +14,7 @@
 
 typedef std::chrono::high_resolution_clock Clock_t;
 
-namespace SIWIR2 {
+namespace HESPA {
     
     class Timer {
         
@@ -24,7 +24,7 @@ namespace SIWIR2 {
         
         Timer() ;
         void reset() ;
-        const double elapsed() const ;
+        double elapsed() const ;
         
     };
 }

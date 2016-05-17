@@ -10,15 +10,15 @@
 
 using namespace std::chrono;
 
-SIWIR2::Timer::Timer():start_(Clock_t::now()) {
+HESPA::Timer::Timer():start_(Clock_t::now()) {
 
 }
 
-void SIWIR2::Timer::reset(){
+void HESPA::Timer::reset(){
     start_ = Clock_t::now() ;
 }
 
-const double SIWIR2::Timer::elapsed() const {
+double HESPA::Timer::elapsed() const {
     
     return duration<double,std::milli>(Clock_t::now() -start_).count() ;
 }

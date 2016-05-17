@@ -9,7 +9,7 @@
 #include <string>
 #include "VTKWriter.h"
 #include <iomanip>
-
+#include "Time.hpp"
 
 int main(int argc, const char * argv[]) {
     // Reading from file
@@ -29,7 +29,6 @@ int main(int argc, const char * argv[]) {
 
     p.fillBuffers(mass,velocity,position);
 
-    std::cout<<mass[1]<<std::endl ;
 
     // Allocating memory on Device
     mass.allocateOnDevice();
@@ -63,8 +62,9 @@ int main(int argc, const char * argv[]) {
     else num_blocks = (numparticles / threads_per_blocks) + 1 ;
 
     //std::cout<<num_blocks<<" "<<threads_per_blocks<<std::endl;
+    real_d time_taken = 0.0 ;
 
-
+    HESPA::Timer time ;
     // Algorithm to follow
     {
 
@@ -72,7 +72,7 @@ int main(int argc, const char * argv[]) {
         // calculate Initial forces
         calcForces<<<2,1>>>(forcenew.devicePtr,position.devicePtr,numparticles,sigma,epsilon) ;
         for(real_d t =0.0 ; t < time_end ; t+= timestep_length ) {
-
+            time.reset();
             // Update the Position
             updatePosition<<<num_blocks,threads_per_blocks>>>(forcenew.devicePtr,position.devicePtr,velocity.devicePtr,mass.devicePtr,numparticles,timestep_length);
 
@@ -84,6 +84,9 @@ int main(int argc, const char * argv[]) {
 
             // Update the velocity
             updateVelocity<<<num_blocks,threads_per_blocks>>>(forcenew.devicePtr,forceold.devicePtr,velocity.devicePtr,mass.devicePtr,numparticles,timestep_length);
+
+            cudaDeviceSynchronize();
+            time_taken += time.elapsed();
 
             if(iter % vtk_out_freq == 0){
                 // copy to host back
@@ -99,6 +102,8 @@ int main(int argc, const char * argv[]) {
         }
 
     }
+
+    std::cout<<"The time taken for "<<numparticles<<" is:= "<<time_taken<<std::endl ;
 
     return 0;
 }                           
