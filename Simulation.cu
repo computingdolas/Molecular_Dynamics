@@ -70,7 +70,7 @@ int main(int argc, const char * argv[]) {
 
         real_l iter = 0 ;
         // calculate Initial forces
-        calcForces<<<2,1>>>(forcenew.devicePtr,position.devicePtr,numparticles,sigma,epsilon) ;
+        calcForces<<<num_blocks ,threads_per_blocks>>>(forcenew.devicePtr,position.devicePtr,numparticles,sigma,epsilon) ;
         for(real_d t =0.0 ; t < time_end ; t+= timestep_length ) {
             time.reset();
             // Update the Position
