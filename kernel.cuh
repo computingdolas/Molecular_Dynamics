@@ -57,7 +57,7 @@ __global__ void updatePosition(const real_d *force,real_d *position,const real_d
     //(timestep * velocity[vidx] )   
     position[vidx]   += (timestep * velocity[vidx] ) + ( (force[vidx] * timestep * timestep) / ( 2.0 * mass[idx]) ) ;
     position[vidx+1] += (timestep * velocity[vidx+1] ) + ( (force[vidx+1] * timestep * timestep) / ( 2.0 * mass[idx]) ) ;
-    position[vidx+2] += (timestep * velocity[vidx+1] ) + ( (force[vidx+2] * timestep * timestep) / ( 2.0 * mass[idx]) ) ;
+    position[vidx+2] += (timestep * velocity[vidx+2] ) + ( (force[vidx+2] * timestep * timestep) / ( 2.0 * mass[idx]) ) ;
     }
 }
 
@@ -71,7 +71,7 @@ __global__ void updateVelocity(const real_d*forceNew,const real_d*forceOld,real_
 
     velocity[vidx] += ( (forceNew[vidx] + forceOld[vidx]) * timestep ) / (2.0 * mass[idx] ) ;
     velocity[vidx+1] += ( (forceNew[vidx+1] + forceOld[vidx+1]) * timestep ) / (2.0 * mass[idx] ) ;
-    velocity[vidx+2] += ( (forceNew[vidx+2] + forceOld[vidx+1]) * timestep ) / (2.0 * mass[idx] ) ;
+    velocity[vidx+2] += ( (forceNew[vidx+2] + forceOld[vidx+2]) * timestep ) / (2.0 * mass[idx] ) ;
     }
 
 }
